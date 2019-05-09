@@ -11,6 +11,7 @@ SELECT <列名>, ...
     SELECT product_id, product_name, purchase_price FROM Product;
     ```
 
+- `SELECT` 子句中可以使用常数或者表达式
 - 查询结果中列的顺序和 `SELECT` 字句中列的顺序相同
 - `*` 表示全部的列
     - 使用 `*` 则无法设定列的显示顺序，此时会按执行 `CREATE TABLE` 语句时定义的顺序对列进行排序
@@ -28,7 +29,7 @@ SELECT <列名>, ...
       FROM Product;
     ```
 
-    - 别名可以使用中文，需要**双引号**括起来（不是单引号）
+    - **别名**需要用**双引号**括起来（不是单引号）
 - 常数查询
 
     ```sql
@@ -59,6 +60,15 @@ SELECT <列名>, ...
     - 两列的数据都相同记录才会被合并为一条
 - `DISTINCT` 关键字只能放在第一个列名前
     - 不能写成 `regist_date, DISTINCT product_type`
+- `FROM` 字句并非必须
+
+    ```sql
+    SELECT (100 + 200) * 3 AS calculation;
+    ```
+
+    - 通过执行 `SELECT` 语句代替计算器的情况基本不存在
+    - 极少数情况下，可以通过使用没有 `FROM` 子句的 `SELECT` 语句来实现某种业务，比如不管内容是什么，只希望得到一行临时数据
+    - > Oracle 不允许省略 `SELECT` 语句中的 `FROM` 子句，可以使用 `DUAL` 临时表；DB2 中可以使用 `SYSIBM.SYSDUMMY1` 临时表
 # `WHERE`
 
 ```sql
