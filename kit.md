@@ -6,3 +6,10 @@
 # Docker
 - `docker stop $(docker ps -aq)`
 - `docker update --restart=no c6ebedc3640c 5974f3fd6c32 f9e71120a907`
+## Markdown
+
+```
+"[markdown]":  {
+    "editor.quickSuggestions": true
+}
+```
