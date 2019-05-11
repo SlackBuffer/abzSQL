@@ -147,3 +147,6 @@
     COMMIT;
     -- SELECT * FROM Product;
     ```
+
+- 子句的书写顺序  
+`SELECT` 子句 → `FROM` 子句 → `WHERE` 子句 → `GROUP BY` 子句 → `HAVING` 子句 → `ORDER BY` 子句

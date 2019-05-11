@@ -12,7 +12,7 @@ SELECT <列名>, ...
     ```
 
 - `SELECT` 子句中可以使用常数或者表达式
-- 查询结果中列的顺序和 `SELECT` 字句中列的顺序相同
+- 查询结果中列的顺序和 `SELECT` 子句中列的顺序相同
 - `*` 表示全部的列
     - 使用 `*` 则无法设定列的显示顺序，此时会按执行 `CREATE TABLE` 语句时定义的顺序对列进行排序
 - 为列设置别名
@@ -60,7 +60,7 @@ SELECT <列名>, ...
     - 两列的数据都相同记录才会被合并为一条
 - `DISTINCT` 关键字只能放在第一个列名前
     - 不能写成 `regist_date, DISTINCT product_type`
-- `FROM` 字句并非必须
+- `FROM` 子句并非必须
 
     ```sql
     SELECT (100 + 200) * 3 AS calculation;
@@ -79,7 +79,7 @@ SELECT <列名>, ...
 
 - SQL 中子句的书写顺序是固定的，不能随意更改，否则会造成执行错误
     - `WHERE` 子句必须紧跟在 `FROM` 子句之后
-- `WHERE` 字句中的条件表达式
+- `WHERE` 子句中的条件表达式
 
     ```sql
     SELECT product_name, product_type
