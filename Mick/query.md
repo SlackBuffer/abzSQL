@@ -224,7 +224,7 @@ SELECT <列名>, ...
 - 查询销售单价高于平均销售单价的商品
 
     ```sql
-    -- 在WHERE子句中不能使用聚合函数
+    -- 在 WHERE 子句中不能使用聚合函数
     SELECT product_id, product＿name, sale_price
       FROM Product
      WHERE sale_price > AVG(sale_price);
@@ -256,3 +256,48 @@ SELECT <列名>, ...
                                 FROM Product);
     ```
 
+# 关联子查询
+- 选取各商品种类中高于该商品种类的平均销售单价的商品
+
+    ```sql
+    SELECT product_type, product_name, sale_price
+      FROM Product AS P1 
+     WHERE sale_price > (SELECT AVG(sale_price)
+                           FROM Product AS P2 
+                          WHERE P1.product_type = P2.product_type
+                            GROUP BY product_type);
+    ```
+
+    - `WHERE P1.product_type = P2.product_type`: 在同一商品种类中对各商品的销售单价和该类商品的平均单价进行比较（限定“商品种类”对平均单价进行比较）
+    - 不使用 `GROUP BY` 语句也能得到正确结果
+- 使用关联子查询时，需要在表所对应的列名之前加上表的别名，以 `<表名>.<列名>` 的形式记述
+- 在细分的组内进行比较时，需要使用关联子查询
+- 首先需要计算各个商品种类中商品的平均销售单价，由于该单价会用来和商品表中的各条记录进行比较，因此关联子查询实际只能返回 1 行结果
+- 关联子查询和 `GROUP BY` 子句一样，也可以对表中的数据进行切分
+![](src/关联子查询.jpg)
+- 结合条件一定要写在子查询中
+- 关联名称（如 `P1`, `P2`）的作用域
+    - 子查询内部设定的关联名称，只能在该子查询内部使用；内部可以看到外部，而外部看不到内部
+    ![](src/子查询关联名称作用域.jpg)
+# 
+5.1
+CREATE VIEW ViewPractice5_1
+AS
+SELECT product_name, sale_price, regist_date
+  FROM Product
+ WHERE sale_price >= 1000 AND regist_date='2009-09-20';
+
+5.2 主键限制
+5.3
+SELECT product_id, product_name, product_type, sale_price, 
+(SELECT AVG(sale_price)
+    FROM Product) AS sale_price_all
+FROM Product;
+
+5.4
+SELECT product_id, product_name, product_type, sale_price, 
+(SELECT AVG(sale_price)
+   FROM Product AS P2 
+  WHERE P1.product_type = P2.product_type
+ GROUP BY product_type) AS avg_sale_price
+FROM Product AS P1;
