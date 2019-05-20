@@ -1,3 +1,4 @@
+# 函数
 - 函数大致分类
     - 算术函数（用来进行数值计算的函数）
     - 字符串函数（用来进行字符串操作的函数）
@@ -102,3 +103,102 @@ COMMIT;
     ```sql
     SELECT str1, SUBSTRING(str1 FROM 3 FOR 2) AS sub_str FROM SampleStr;
     ```
+
+## 日期函数
+- DBMS 对日期函数的实现多不相同
+- `CURRENT_DATE`: `SELECT CURRENT_DATE;` 
+- `CURRENT_TIME`
+- `CURRENT_TIMESTAMP`: 当前日期和时间
+- `EXTRACT`
+    - `EXTRACT(日期元素 FROM 日期)`
+    - 返回值是数值类型
+
+    ```sql
+    SELECT CURRENT_TIMESTAMP,
+           EXTRACT(YEAR FROM CURRENT_TIMESTAMP) AS year,
+           EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AS month,
+           EXTRACT(DAY FROM CURRENT_TIMESTAMP) AS day,
+           EXTRACT(HOUR FROM CURRENT_TIMESTAMP) AS hour,
+           EXTRACT(MINUTE FROM CURRENT_TIMESTAMP) AS minute,
+           EXTRACT(SECOND FROM CURRENT_TIMESTAMP) AS second;
+    ```
+
+## 转换函数    
+- `CAST`
+    - 类型转换，`CAST(转换前的值 AS 想要转换的数据类型)`
+    - > 之所以需要进行类型转换，是因为可能会插入与表中数据类型不匹配的数据，或者在进行运算时由于数据类型不一致发生了错误，又或者是进行自动类型转换会造成处理速度低下
+    	
+        ```sql
+        -- 字符串类型转成数值类型
+        SELECT CAST('0001' AS INTEGER) AS int_col;
+        -- 字符串类型转成日期类型
+        SELECT CAST('2009-12-14' AS DATE) AS date_col;
+        ```
+    
+- `COALESCE`
+    - `NULL` 转换为其他值，`COALESCE(数据1, 数据2, 数据3...)`
+    - 返回**可变参数**中左侧开始第 1 个不是 `NULL` 的值
+    	
+        ```sql
+        SELECT COALESCE(NULL, 1) AS col_1,
+               COALESCE(NULL, 'test', NULL) AS col_2,
+               COALESCE(NULL, NULL, '2009-11-01') AS col_3;
+
+        SELECT COALESCE(str2, 'NULL') FROM SampleStr;
+        ```
+    
+        - 若包含 `NULL` 的列，通过 `COALESCE` 函数转换为其他值后再应用到其它函数或者运算中，这样结果就不再是 `NULL`
+# 谓词（predicate）
+- 谓词就是返回值为真值的函数
+    - 比较运算符的正式名称是比较谓词
+## `LIKE`
+- 字符串部分一致性查询
+- 部分一致大体可以分为前方一致、中间一致和后方一致三种类型
+	
+```sql
+CREATE TABLE SampleLike
+(strcol VARCHAR(6) NOT NULL,
+ PRIMARY KEY (strcol));
+
+BEGIN TRANSACTION;
+INSERT INTO SampleLike (strcol) VALUES ('abcddd');
+INSERT INTO SampleLike (strcol) VALUES ('dddabc');
+INSERT INTO SampleLike (strcol) VALUES ('abdddc');
+INSERT INTO SampleLike (strcol) VALUES ('abcdd');
+INSERT INTO SampleLike (strcol) VALUES ('ddabc');
+INSERT INTO SampleLike (strcol) VALUES ('abddc');
+COMMIT;
+```
+
+- 中间一致同时包含前方一致和后方一致的查询结果
+	
+    ```sql
+    -- 前方一致性
+    SELECT *
+      FROM SampleLike
+     WHERE strcol LIKE 'ddd%';
+    -- 中间一致性 
+    SELECT *
+      FROM SampleLike
+     WHERE strcol LIKE '%ddd%';
+    -- 后方一致性     
+    SELECT *
+      FROM SampleLike
+     WHERE strcol LIKE '%ddd';
+    ```
+
+- `%` 代表**大于等于** 0 个字符
+- `_` 代表任意 1 个字符
+## `BETWEEN`
+- 范围查询
+- 包含边界值
+	
+```sql
+SELECT product_name, sale_price
+  FROM Product
+ WHERE sale_price BETWEEN 100 AND 1000;
+```
+
+## `IS NULL`, `IS NOT NULL`
+## `IN`, `NOT IN`
+- `IN` 和 `NOT IN` 无法选出 `NULL` 数据
