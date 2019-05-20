@@ -202,3 +202,174 @@ SELECT product_name, sale_price
 ## `IS NULL`, `IS NOT NULL`
 ## `IN`, `NOT IN`
 - `IN` 和 `NOT IN` 无法选出 `NULL` 数据
+	
+    ```sql
+    SELECT product_name, purchase_price
+      FROM Product
+     WHERE purchase_price NOT IN (320, 500, 5000);
+    ```
+
+- `IN`, `NOT IN` 谓词具有其他谓词所没有的用法，可以使用**子查询作为参数**
+
+```sql
+CREATE TABLE ShopProduct
+(shop_id CHAR(4) NOT NULL,
+ shop_name VARCHAR(200) NOT NULL,
+ product_id CHAR(4) NOT NULL,
+ quantity INTEGER NOT NULL,
+ PRIMARY KEY (shop_id, product_id)); -- 指定 2 列作为主键
+
+BEGIN TRANSACTION;
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000A', '东京', '0001', 30);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000A', '东京', '0002', 50);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000A', '东京', '0003', 15);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000B', '名古屋', '0002', 30);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000B', '名古屋', '0003', 120);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000B', '名古屋', '0004', 20);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000B', '名古屋', '0006', 10);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000B', '名古屋', '0007', 40);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000C', '大阪', '0003', 20);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000C', '大阪', '0004', 50);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000C', '大阪', '0006', 90);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000C', '大阪', '0007', 70);
+INSERT INTO ShopProduct (shop_id, shop_name, product_id, quantity) VALUES ('000D', '福冈', '0001', 100);
+COMMIT;
+```
+
+- 子查询作为 `IN` 参数
+	
+    ```sql
+    -- 取得“在大阪店销售的商品的销售单价”
+    SELECT product_name, sale_price
+      FROM Product
+     WHERE product_id IN (SELECT product_id
+                            FROM ShopProduct
+                           WHERE shop_id = '000C');
+    ```
+
+## `EXIST`
+- 判断是否存在满足某种条件的**记录**
+    - 存在返回 `TRUE`，不存在返回 `FALSE`
+- `EXIST` 通常会使用关联子查询作为参数
+- `EXIST` 替代 `IN`	
+
+    ```sql
+    -- 大阪店在售商品的销售单价
+    SELECT product_name, sale_price
+      FROM Product AS P
+     WHERE EXISTS (SELECT *
+                     FROM ShopProduct AS SP
+                    WHERE SP.shop_id = '000C'
+                      AND SP.product_id = P.product_id);
+    ```
+
+    - `SELECT *`: `EXIST` 只关心记录是否存在，因此返回哪些列都没有关系
+- `NOT EXIST` 替代 `NOT IN`	
+# `CASE` 表达式
+- `CASE` 表达式的语法分为简单 `CASE` 表达式和搜索 `CASE` 表达式
+    - 搜索 `CASE` 表达式包含简单 `CASE` 表达式的全部功能
+	
+    ```sql
+    CASE WHEN <求值表达式> THEN <表达式>
+         WHEN <求值表达式> THEN <表达式>
+         WHEN <求值表达式> THEN <表达式>
+         ...
+         ELSE <表达式>
+    END
+    ```
+
+    - 求值表达式值为真值（`TRUE/FALSE/UNKNOWN`）
+    - 依次执行，有一个 case 为 `TRUE` 就停止执行；所有 `WHEN` 执行完无 TRUE，则返回 `ELSE` 中的表达式，执行终止
+    - `END` 不能省略，`ELSE` 可以省略但不建议省略
+- 通过 CASE 表达式为商品种类的值添加前缀
+	
+    ```sql
+    SELECT product_name,
+           CASE WHEN product_type = '衣服'
+                THEN 'A ：' || product_type
+                WHEN product_type = '办公用品'
+                THEN 'B ：' || product_type
+                WHEN product_type = '厨房用具'
+                THEN 'C ：' || product_type
+                ELSE NULL
+           END AS abc_product_type
+    FROM Product;
+    ```
+
+- 使用 `CASE` 表达式进行行列转换
+	
+    ```sql
+    SELECT SUM(CASE WHEN product_type = '衣服'
+                    THEN sale_price ELSE 0 END) AS sum_price_clothes,
+           SUM(CASE WHEN product_type = '厨房用具'
+                    THEN sale_price ELSE 0 END) AS sum_price_kitchen,
+           SUM(CASE WHEN product_type = '办公用品'
+                    THEN sale_price ELSE 0 END) AS sum_price_office
+           FROM Product;
+
+    -- 未转换
+    SELECT product_type,
+           SUM(sale_price) AS sum_price
+      FROM Product
+     GROUP BY product_type;
+    ```
+
+- `CASE` 表达式适用于对 `SELECT` 结果进行编辑
+- 简单 `CASE` 表达式
+	
+    ```sql
+    CASE <表达式>
+        WHEN <表达式> THEN <表达式>
+        WHEN <表达式> THEN <表达式>
+        WHEN <表达式> THEN <表达式>
+        ...
+        ELSE <表达式>
+    END
+    ```
+
+- 对比
+	
+    ```sql
+    -- 使用搜索 `CASE` 表达式
+    SELECT product_name,
+        CASE WHEN product_type = '衣服'
+             THEN 'A ：' | |product_type
+             WHEN product_type = '办公用品'
+             THEN 'B ：' | |product_type
+             WHEN product_type = '厨房用具'
+             THEN 'C ：' | |product_type
+             ELSE NULL
+         END AS abc_product_type
+    FROM Product;
+
+    -- 使用简单 `CASE` 表达式
+    SELECT product_name,
+        CASE product_type
+             WHEN '衣服' THEN 'A ：' | | product_type
+             WHEN '办公用品' THEN 'B ：' | | product_type
+             WHEN '厨房用具' THEN 'C ：' | | product_type
+             ELSE NULL
+         END AS abc_product_type
+    FROM Product;
+    ```
+
+    - 简单 `CASE` 表达式无法在 `WHEN` 子句中指定和 `CASE` 中不同的列
+# 习题
+- `NOT IN` 的参数中包含 `NULL` 时结果通常会为空；使用子查询作为 `NOT IN` 的参数时，该子查询的返回值也不能是 `NULL`
+	
+    ```sql
+    -- 6.1
+    SELECT product_name, purchase_price
+      FROM Product
+     WHERE purchase_price NOT IN (NULL);    
+    ```
+
+- 6.2
+	
+    ```sql
+    -- 可以用 `BETWEEN`
+    SELECT SUM(CASE WHEN sale_price <= 1000 THEN 1 ELSE 0 END) AS low_price,
+           SUM(CASE WHEN sale_price > 1000 AND sale_price <= 3000 THEN 1 ELSE 0 END) AS mid_price,
+           SUM(CASE WHEN sale_price > 3000 THEN 1 ELSE 0 END) AS high_price  
+           FROM Product; 
+    ```
