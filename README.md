@@ -1,2 +1,3 @@
 - http://www.ituring.com.cn/book/1880
-- Continues at p238
+- http://wiki.postgresql.org/wiki/Developer_FAQ#Where_can_I_get_a_copy_of_the_SQL_standards.3F
+- Continues at p255

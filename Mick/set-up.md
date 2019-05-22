@@ -10,6 +10,7 @@
 
     docker start learn-sql
     show server_encoding;
+    SELECT version();
     ```
 
     - > https://hub.docker.com/_/postgres
