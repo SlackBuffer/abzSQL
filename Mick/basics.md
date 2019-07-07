@@ -10,7 +10,7 @@
             4. PostgreSQL - 开源
             5. MySQL - 开源
     3. 面向对象数据库（Object Oriented Database，OODB）
-    4. XML数据库（XML Database，XMLDB）
+    4. XML 数据库（XML Database，XMLDB）
     5. 键值存储系统（Key-Value Store，KVS）
 - 关系数据库采用被称为数据库表的二维表来管理数据
 - 表的列（垂直方向）称为**字段**，它代表了保存在表中的数据项目
@@ -52,7 +52,7 @@
 - 只能使用英文字母、数字、下划线作为数据库、表和列的名称；名称必须以英文字母开头
 - 注释
     - 单行 `-- `
-        - MySQL 中 `--`要跟空格
+        - MySQL 中 `--` 要跟空格
     - 多行 `/**/`
 
 
@@ -134,7 +134,7 @@
 - 插入数据
 
     ```sql
-    -- DML ：插入数据
+    -- DML：插入数据
     BEGIN TRANSACTION;
     INSERT INTO Product VALUES ('0001', 'T恤衫', '衣服', 1000, 500, '2009-09-20');
     INSERT INTO Product VALUES ('0002', '打孔器', '办公用品', 500, 320, '2009-09-11');

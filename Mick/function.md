@@ -83,7 +83,7 @@ COMMIT;
     - SQL Server 用 `+`，MySql 使用 `CONCAT`
 - `LENGTH(字符串)`
     - SQL Serve 用 `LEN`
-    - **注意多字节字符**
+    - 注意**多字节字符**
 - `LOW(字符串)`, `UPPER(字符串)`
 	
     ```sql
@@ -98,7 +98,7 @@ COMMIT;
     ```
 
 - `SUBSTRING(对象字符串 FROM 截取的起始位置 FOR 截取的字符数)`
-    - **注意多字节字符**
+    - 注意**多字节字符**
 	
     ```sql
     SELECT str1, SUBSTRING(str1 FROM 3 FOR 2) AS sub_str FROM SampleStr;
@@ -106,7 +106,8 @@ COMMIT;
 
 ## 日期函数
 - DBMS 对日期函数的实现多不相同
-- `CURRENT_DATE`: `SELECT CURRENT_DATE;` 
+- `CURRENT_DATE`
+    - `SELECT CURRENT_DATE;` 
 - `CURRENT_TIME`
 - `CURRENT_TIMESTAMP`: 当前日期和时间
 - `EXTRACT`
@@ -136,7 +137,7 @@ COMMIT;
         ```
     
 - `COALESCE`
-    - `NULL` 转换为其他值，`COALESCE(数据1, 数据2, 数据3...)`
+    - 将 `NULL` 转换为其他值，`COALESCE(数据1, 数据2, 数据3...)`
     - 返回**可变参数**中左侧开始第 1 个不是 `NULL` 的值
     	
         ```sql
@@ -149,8 +150,8 @@ COMMIT;
     
         - 若包含 `NULL` 的列，通过 `COALESCE` 函数转换为其他值后再应用到其它函数或者运算中，这样结果就不再是 `NULL`
 # 谓词（predicate）
-- 谓词就是返回值为真值的函数
-    - 比较运算符的正式名称是比较谓词
+- 谓词就是**返回值为真值的函数**
+- 比较运算符的正式名称是比较谓词
 ## `LIKE`
 - 字符串部分一致性查询
 - 部分一致大体可以分为前方一致、中间一致和后方一致三种类型
@@ -187,8 +188,7 @@ COMMIT;
      WHERE strcol LIKE '%ddd';
     ```
 
-- `%` 代表**大于等于** 0 个字符
-- `_` 代表任意 1 个字符
+- `%` 代表**大于等于** 0 个字符；`_` 代表任意 1 个字符
 ## `BETWEEN`
 - 范围查询
 - 包含边界值
@@ -201,7 +201,8 @@ SELECT product_name, sale_price
 
 ## `IS NULL`, `IS NOT NULL`
 ## `IN`, `NOT IN`
-- `IN` 和 `NOT IN` 无法选出 `NULL` 数据
+- `OR` 的简便用法
+- `IN` 和 `NOT IN` 无法选出的数据都不包括 `NULL`
 	
     ```sql
     SELECT product_name, purchase_price
@@ -263,11 +264,14 @@ COMMIT;
                       AND SP.product_id = P.product_id);
     ```
 
-    - `SELECT *`: `EXIST` 只关心记录是否存在，因此返回哪些列都没有关系
+    - `SELECT *`
+        - `EXIST` 只会判断是否存在满足子查询中 `WHERE` 子句指定的条件 `shop_id` 为`'000C'`，商品（`Product`）表和商店商品（`ShopProduct`）表中 `product_id` 相同的记录，只有存在这样的记录时才返回 `TRUE`
+        - `EXIST` 只关心记录是否存在，因此返回哪些列都没有关系
+        - `EXIST` 的子查询中写 `SELECT *` 可以当作 SQL 的一种惯例
 - `NOT EXIST` 替代 `NOT IN`	
 # `CASE` 表达式
-- `CASE` 表达式的语法分为简单 `CASE` 表达式和搜索 `CASE` 表达式
-    - 搜索 `CASE` 表达式包含简单 `CASE` 表达式的全部功能
+- `CASE` 表达式适用于对 `SELECT` 结果进行编辑
+- `CASE` 表达式的语法分为简单 `CASE` 表达式和搜索 `CASE` 表达式（搜索 `CASE` 表达式包含简单 `CASE` 表达式的全部功能）
 	
     ```sql
     CASE WHEN <求值表达式> THEN <表达式>
@@ -279,9 +283,9 @@ COMMIT;
     ```
 
     - 求值表达式值为真值（`TRUE/FALSE/UNKNOWN`）
-    - 依次执行，有一个 case 为 `TRUE` 就停止执行；所有 `WHEN` 执行完无 TRUE，则返回 `ELSE` 中的表达式，执行终止
+    - 依次执行，有一个 `CASE` 为 `TRUE` 就停止执行；所有 `WHEN` 执行完无 `TRUE`，则返回 `ELSE` 中的表达式，执行终止
     - `END` 不能省略，`ELSE` 可以省略但不建议省略
-- 通过 CASE 表达式为商品种类的值添加前缀
+- 通过 `CASE` 表达式为商品种类的值添加前缀
 	
     ```sql
     SELECT product_name,
@@ -296,7 +300,8 @@ COMMIT;
     FROM Product;
     ```
 
-- 使用 `CASE` 表达式进行行列转换
+- `CASE` 表达式的便利之处就在于它是一个表达式，表达式可以书写在任意位置
+- 使用 `CASE` 表达式进行**行列转换**
 	
     ```sql
     SELECT SUM(CASE WHEN product_type = '衣服'
@@ -305,7 +310,7 @@ COMMIT;
                     THEN sale_price ELSE 0 END) AS sum_price_kitchen,
            SUM(CASE WHEN product_type = '办公用品'
                     THEN sale_price ELSE 0 END) AS sum_price_office
-           FROM Product;
+        FROM Product;
 
     -- 未转换
     SELECT product_type,
@@ -314,7 +319,6 @@ COMMIT;
      GROUP BY product_type;
     ```
 
-- `CASE` 表达式适用于对 `SELECT` 结果进行编辑
 - 简单 `CASE` 表达式
 	
     ```sql
@@ -353,7 +357,8 @@ COMMIT;
     FROM Product;
     ```
 
-    - 简单 `CASE` 表达式无法在 `WHEN` 子句中指定和 `CASE` 中不同的列
+    - 简单 `CASE` 表达式最初的 `CASE<表达式>` 也会作为求值的对象
+    - 简单 `CASE` 表达式在将想要求值的表达式（此处是列）书写过一次之后，就无需在之后的 `WHEN` 子句中重复书写 `product_type`，但无法在 `WHEN` 子句中指定和 `CASE` 中不同的列
 # 习题
 - `NOT IN` 的参数中包含 `NULL` 时结果通常会为空；使用子查询作为 `NOT IN` 的参数时，该子查询的返回值也不能是 `NULL`
 	
